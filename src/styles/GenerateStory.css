@@ -1,0 +1,118 @@
+.generate-story {
+  padding: 2rem;
+  font-family: Arial, sans-serif;
+  color: #333;
+}
+
+.story-title {
+  text-align: center;
+  font-size: 2.5rem;
+  color: #ff7f50;
+  margin-bottom: 1rem;
+}
+
+.chapter {
+  margin: 2rem 0;
+  padding: 1rem;
+  background: #f9f9f9;
+  border-radius: 12px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.chapter-title {
+  font-size: 1.8rem;
+  color: #007bff;
+  margin-bottom: 0.5rem;
+}
+
+.chapter-content {
+  font-size: 1.2rem;
+  line-height: 1.6;
+}
+
+.decision-section {
+  margin-top: 2rem;
+  text-align: center;
+}
+
+.decision-title {
+  font-size: 1.5rem;
+  color: #333;
+  margin-bottom: 1rem;
+}
+
+.decision-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.decision-button {
+  background-color: #007bff;
+  color: white;
+  padding: 0.8rem 1.2rem;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.decision-button:hover {
+  background-color: #0056b3;
+}
+.generate-button {
+    background-color: #007bff;
+    color: white;
+    padding: 1rem 2.5rem;
+    border: none;
+    border-radius: 20px;
+    font-size: 20px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease, transform 0.2s ease;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  }
+  
+  .generate-button:hover {
+    background-color: #0056b3;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+    transform: scale(1.05);
+  }
+  .story-image {
+    width: auto;
+    max-width: 400px;
+    height: auto;
+    margin: 1rem auto; /* Centra la imagen horizontalmente */
+    display: block; /* Asegura que se comporte como un bloque */
+    border-radius: 12px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Sombra para destacar */
+  }
+  .generate-story {
+    text-align: center;
+    margin: 2rem 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Centrar contenido horizontalmente */
+    justify-content: center; /* Centrar contenido verticalmente */
+  }
+  
+  .generate-button {
+    background-color: #007bff;
+    color: white;
+    padding: 1rem 2.5rem;
+    border: none;
+    border-radius: 20px;
+    font-size: 20px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease, transform 0.2s ease;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  }
+  
+  .generate-button:hover {
+    background-color: #0056b3;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+    transform: scale(1.05);
+  }
+  

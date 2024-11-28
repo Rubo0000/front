@@ -1,25 +1,50 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { useState } from "react";
+import MainMenu from "./components/MainMenu";
+import GenerateStory from "./components/GenerateStory";
+import Navbar from "./components/Navbar";
 
-function App() {
+const App = () => {
+  const [userInputs, setUserInputs] = useState({
+    mainCharacter: {
+      name: "",
+      age: "",
+      race: "",
+      sex: "",
+      personalityTraits: [],
+      weapon: "",
+      skills: [],
+      motivation: "",
+    },
+    sideCharacter: {
+      name: "",
+      age: "",
+      race: "",
+      sex: "",
+      personalityTraits: [],
+      weapon: "",
+      skills: [],
+      motivation: "",
+    },
+    setting: {
+      genre: "",
+      location: "",
+      tone: "",
+    },
+    plot: {
+      storyGoal: "",
+      finalEnemy: "",
+      numberOfChapters: 1,
+      style: "",
+    },
+  });
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div>
+      <Navbar />
+      <MainMenu userInputs={userInputs} setUserInputs={setUserInputs} />
+      <GenerateStory userInputs={userInputs} />
     </div>
   );
-}
+};
 
 export default App;
