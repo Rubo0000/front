@@ -5,6 +5,7 @@ import { generateStory, makeDecision, generateImage } from "../api"; // Asegúra
 
 const GenerateStory = ({ userInputs }) => {
   const [title, setTitle] = useState("");
+  const [images, setImages] = useState([]); // Nuevo estado para almacenar imágenes
   const [chapters, setChapters] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -13,7 +14,6 @@ const GenerateStory = ({ userInputs }) => {
   const [decisionActive, setDecisionActive] = useState(false);
   const [decisionOptions, setDecisionOptions] = useState([]);
   const [decisionQuestion, setDecisionQuestion] = useState(""); // Nuevo estado para almacenar la pregunta.
-  const [imageUrl, setImageUrl] = useState(""); // Nuevo estado para almacenar la URL de la imagen.
 
   const handleGenerateStory = async () => {
     setLoading(true);
@@ -30,7 +30,7 @@ const GenerateStory = ({ userInputs }) => {
       let storyContent = storyContentMatch.join("\n\n").trim();
 
       // Extraer opciones de decisión y la pregunta
-      const decisionStartIndex = storyContent.indexOf("*Decisions:*");
+      const decisionStartIndex = storyContent.indexOf("Decisions:");
       const decisionOptions = decisionStartIndex !== -1
         ? storyContent
           .slice(decisionStartIndex) // Captura la sección desde "What should"
@@ -58,6 +58,8 @@ const GenerateStory = ({ userInputs }) => {
       setDecisionOptions(decisionOptions);
       setDecisionQuestion(decisionQuestion); // Almacena la pregunta.
       setDecisionActive(decisionOptions.length > 0);
+      const imageUrl = await generateImage({ chapter: storyContent });
+      setImages([imageUrl]);
       setCurrentChapterCount(1);
     } catch (err) {
       console.error("Error generating story:", err);
@@ -78,7 +80,8 @@ const GenerateStory = ({ userInputs }) => {
       const [chapterMatch, ...contentMatch] = response.split("\n\n");
       const newChapter = chapterMatch?.trim() || "Untitled Chapter";
       let newContent = contentMatch.join("\n\n").trim();
-
+      //const imageUrl = await generateImage({ chapter: newContent });
+      
       // Extraer opciones de decisión y la pregunta
       const decisionStartIndex = newContent.indexOf("*Decisions:*");
       const newDecisionOptions = decisionStartIndex !== -1
@@ -104,11 +107,12 @@ const GenerateStory = ({ userInputs }) => {
       setDecisionOptions(newDecisionOptions);
       setDecisionQuestion(newDecisionQuestion); // Actualiza la pregunta.
       setDecisionActive(newDecisionOptions.length > 0);
+      //setImages((prevImages) => [...prevImages, imageUrl]);
       console.log(currentChapterCount);
       setCurrentChapterCount((prevCount) => prevCount + 1);
 
       if (currentChapterCount + 1 === userInputs.plot.numberOfChapters) {
-        const evaluationStartIndex = newContent.indexOf("**Your decisions led");
+        const evaluationStartIndex = newContent.indexOf("**Evaluation:**");
         if (evaluationStartIndex !== -1) {
           const evaluationContent = newContent.slice(evaluationStartIndex).trim(); // Extrae desde esa posición
           newContent = newContent.slice(0, evaluationStartIndex).trim(); // Elimina la evaluación del contenido del capítulo
@@ -136,34 +140,47 @@ const GenerateStory = ({ userInputs }) => {
       ) : (
         <div className="story-container">
           <h1 className="story-title">{title || "Your Adventure Awaits"}</h1>
-          <img
-            src={imageUrl || "../assets/icons/placeholder.jpg"}
-            alt="Story Illustration"
-            className="story-image"
-          />
           {chapters.map((chapter, index) => (
             <div key={index} className="chapter">
               <h2 className="chapter-title">Chapter {index + 1}</h2>
+              <img
+                src={images[index] || "../assets/icons/placeholder.jpg"}
+                alt={`Chapter ${index + 1} Illustration`}
+                className="chapter-image"
+              />
               <p className="chapter-content">{chapter}</p>
             </div>
           ))}
-          {decisionActive && currentChapterCount < userInputs.plot.numberOfChapters && (
-            <div className="decision-section">
-              <h3 className="decision-title">{decisionQuestion || "What will the character do?"}</h3>
-              <div className="decision-buttons">
-                {decisionOptions.map((option, index) => (
-                  <button
-                    key={index}
-                    className="decision-button"
-                    onClick={() => handleDecision(index + 1)}
-                    disabled={loading}
-                  >
-                    {option.trim()}
-                  </button>
-                ))}
+          <div className="decision-section">
+            {loading ? (
+              <div className="loading-indicator">
+                <p>Generating story, please wait...</p>
+                <div className="spinner"></div> {/* Spinner animado */}
               </div>
-            </div>
-          )}
+            ) : (
+              <>
+                {decisionActive && currentChapterCount < userInputs.plot.numberOfChapters && (
+                  <>
+                    <h3 className="decision-title">
+                      {decisionQuestion || "What will the character do?"}
+                    </h3>
+                    <div className="decision-buttons">
+                      {decisionOptions.map((option, index) => (
+                        <button
+                          key={index}
+                          className="decision-button"
+                          onClick={() => handleDecision(index + 1)}
+                          disabled={loading} // Deshabilita mientras carga
+                        >
+                          {option.trim()}
+                        </button>
+                      ))}
+                    </div>
+                  </>
+                )}
+              </>
+            )}
+          </div>
           {currentChapterCount === userInputs.plot.numberOfChapters && (
             <Evaluation evaluationContent={evaluation} />
           )}
@@ -173,5 +190,6 @@ const GenerateStory = ({ userInputs }) => {
     </div>
   );
 };
+
 
 export default GenerateStory;

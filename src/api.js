@@ -28,16 +28,17 @@ export const makeDecision = async (decisionData) => {
     throw error;
   }
 };
-// Endpoint para generar una imagen
-export const generateImage = async (imageData) => {
+
+export const generateImage = async (chapterData) => {
   try {
-    const response = await API.post("/image/generate", imageData); // Ajusta el endpoint según el backend
-    return response.data; // Devuelve la respuesta que incluye las URLs de las imágenes generadas
+    const response = await API.post("/chatgpt/image", chapterData);
+    return response.data; // Devuelve la URL de la imagen
   } catch (error) {
     console.error("Error generating image:", error);
     throw error;
   }
 };
+
 
 
 export default API;
