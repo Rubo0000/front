@@ -1,42 +1,64 @@
 import React, { useState } from "react";
 import "../styles/GenerateStory.css";
-import placeholderImage from "../assets/icons/placeholder.jpg";
-import { generateStory, makeDecision } from "../api";
+import Evaluation from "./Evaluation";
+import { generateStory, makeDecision, generateImage } from "../api"; // Asegúrate de que el API `generateImage` esté configurado
 
 const GenerateStory = ({ userInputs }) => {
   const [title, setTitle] = useState("");
   const [chapters, setChapters] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [evaluation, setEvaluation] = useState("");
+  const [currentChapterCount, setCurrentChapterCount] = useState(0); // Nuevo estado para contar capítulos
   const [decisionActive, setDecisionActive] = useState(false);
   const [decisionOptions, setDecisionOptions] = useState([]);
+  const [decisionQuestion, setDecisionQuestion] = useState(""); // Nuevo estado para almacenar la pregunta.
+  const [imageUrl, setImageUrl] = useState(""); // Nuevo estado para almacenar la URL de la imagen.
 
   const handleGenerateStory = async () => {
     setLoading(true);
     setError("");
     try {
       console.log("Sending story data to the backend:", userInputs);
+      console.log(userInputs.plot.numberOfChapters);
       const response = await generateStory(userInputs);
       console.log("Response from backend:", response);
-  
-      // Ajusta el formato según la respuesta
-      const [storyTitleMatch, ...storyContentMatch] = response.split("\n\n"); // Divide por doble salto de línea
+
+      // Divide la respuesta en bloques y toma el título y contenido
+      const [storyTitleMatch, ...storyContentMatch] = response.split("\n\n");
       const storyTitle = storyTitleMatch?.trim() || "Untitled Story";
-      const storyContent = storyContentMatch.join("\n\n").trim();
-  
-      // Extraer opciones de decisión (si existen)
-      const optionsMatch = storyContent.match(/Decision:\n(.*?\n.*?)/);
-      const decisionOptions = optionsMatch
-        ? optionsMatch[1]
-            .split("\n")
-            .filter((line) => line.trim().length > 0)
-            .map((option) => option.trim())
+      let storyContent = storyContentMatch.join("\n\n").trim();
+
+      // Extraer opciones de decisión y la pregunta
+      const decisionStartIndex = storyContent.indexOf("*Decisions:*");
+      const decisionOptions = decisionStartIndex !== -1
+        ? storyContent
+          .slice(decisionStartIndex) // Captura la sección desde "What should"
+          .split("\n") // Divide en líneas.
+          .filter((line) => /^\d+\./.test(line.trim())) // Busca líneas con formato de decisión.
+          .map((line) => line.trim()) // Limpia espacios.
         : [];
-  
+
+      // Extraer la pregunta completa (línea anterior a las decisiones)
+      const decisionQuestion = decisionStartIndex !== -1
+        ? storyContent
+          .slice(decisionStartIndex)
+          .split("\n")[0]
+          .trim() // La primera línea en la sección de decisiones.
+        : "";
+
+      if (decisionStartIndex !== -1) {
+        storyContent = storyContent.slice(0, decisionStartIndex).trim(); // Elimina la sección de decisiones del contenido.
+      }
+
+
+
       setTitle(storyTitle);
       setChapters([storyContent]);
       setDecisionOptions(decisionOptions);
+      setDecisionQuestion(decisionQuestion); // Almacena la pregunta.
       setDecisionActive(decisionOptions.length > 0);
+      setCurrentChapterCount(1);
     } catch (err) {
       console.error("Error generating story:", err);
       setError("Failed to generate the story. Please try again.");
@@ -44,9 +66,6 @@ const GenerateStory = ({ userInputs }) => {
       setLoading(false);
     }
   };
-  
-  
-  
 
   const handleDecision = async (decisionNumber) => {
     setLoading(true);
@@ -54,24 +73,48 @@ const GenerateStory = ({ userInputs }) => {
     try {
       const response = await makeDecision({ decision: decisionNumber });
       console.log("Response from backend for decision:", response);
-  
-      // Procesar el nuevo capítulo y decisiones
+
+      // Procesar el nuevo capítulo
       const [chapterMatch, ...contentMatch] = response.split("\n\n");
       const newChapter = chapterMatch?.trim() || "Untitled Chapter";
-      const newContent = contentMatch.join("\n\n").trim();
-  
-      // Extraer nuevas decisiones
-      const optionsMatch = newContent.match(/Decision:\n([\s\S]*?)\n\n/); // Busca todas las opciones de decisión hasta un doble salto de línea
-      const newDecisionOptions = optionsMatch
-        ? optionsMatch[1]
-            .split("\n") // Divide las líneas
-            .filter((line) => line.trim().length > 0) // Elimina líneas vacías
-            .map((option) => option.trim()) // Limpia espacios
+      let newContent = contentMatch.join("\n\n").trim();
+
+      // Extraer opciones de decisión y la pregunta
+      const decisionStartIndex = newContent.indexOf("*Decisions:*");
+      const newDecisionOptions = decisionStartIndex !== -1
+        ? newContent
+          .slice(decisionStartIndex) // Captura la sección desde "What should"
+          .split("\n") // Divide en líneas.
+          .filter((line) => /^\d+\./.test(line.trim())) // Busca líneas con formato de decisión.
+          .map((line) => line.trim()) // Limpia espacios.
         : [];
-  
+
+      const newDecisionQuestion = decisionStartIndex !== -1
+        ? newContent
+          .slice(decisionStartIndex)
+          .split("\n")[0]
+          .trim() // La primera línea en la sección de decisiones.
+        : "";
+
+      if (decisionStartIndex !== -1) {
+        newContent = newContent.slice(0, decisionStartIndex).trim(); // Elimina la sección de decisiones del contenido.
+      }
+
       setChapters((prevChapters) => [...prevChapters, `${newChapter}\n${newContent}`]);
-      setDecisionOptions(newDecisionOptions); // Actualiza con todas las opciones extraídas
+      setDecisionOptions(newDecisionOptions);
+      setDecisionQuestion(newDecisionQuestion); // Actualiza la pregunta.
       setDecisionActive(newDecisionOptions.length > 0);
+      console.log(currentChapterCount);
+      setCurrentChapterCount((prevCount) => prevCount + 1);
+
+      if (currentChapterCount + 1 === userInputs.plot.numberOfChapters) {
+        const evaluationStartIndex = newContent.indexOf("**Your decisions led");
+        if (evaluationStartIndex !== -1) {
+          const evaluationContent = newContent.slice(evaluationStartIndex).trim(); // Extrae desde esa posición
+          newContent = newContent.slice(0, evaluationStartIndex).trim(); // Elimina la evaluación del contenido del capítulo
+          setEvaluation(evaluationContent); // Almacena la evaluación
+        }
+      }
     } catch (err) {
       console.error("Error making decision:", err);
       setError("Failed to continue the story. Please try again.");
@@ -79,8 +122,7 @@ const GenerateStory = ({ userInputs }) => {
       setLoading(false);
     }
   };
-  
-  
+
   return (
     <div className="generate-story">
       {!chapters.length ? (
@@ -94,16 +136,20 @@ const GenerateStory = ({ userInputs }) => {
       ) : (
         <div className="story-container">
           <h1 className="story-title">{title || "Your Adventure Awaits"}</h1>
-          <img src={placeholderImage} alt="Story Placeholder" className="story-image" />
+          <img
+            src={imageUrl || "../assets/icons/placeholder.jpg"}
+            alt="Story Illustration"
+            className="story-image"
+          />
           {chapters.map((chapter, index) => (
             <div key={index} className="chapter">
               <h2 className="chapter-title">Chapter {index + 1}</h2>
               <p className="chapter-content">{chapter}</p>
             </div>
           ))}
-          {decisionActive && (
+          {decisionActive && currentChapterCount < userInputs.plot.numberOfChapters && (
             <div className="decision-section">
-              <h3 className="decision-title">What will the character do?</h3>
+              <h3 className="decision-title">{decisionQuestion || "What will the character do?"}</h3>
               <div className="decision-buttons">
                 {decisionOptions.map((option, index) => (
                   <button
@@ -117,6 +163,9 @@ const GenerateStory = ({ userInputs }) => {
                 ))}
               </div>
             </div>
+          )}
+          {currentChapterCount === userInputs.plot.numberOfChapters && (
+            <Evaluation evaluationContent={evaluation} />
           )}
         </div>
       )}

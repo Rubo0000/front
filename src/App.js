@@ -33,7 +33,7 @@ const App = () => {
     plot: {
       storyGoal: "",
       finalEnemy: "",
-      numberOfChapters: 1,
+      numberOfChapters: 2,
       style: "",
     },
   });

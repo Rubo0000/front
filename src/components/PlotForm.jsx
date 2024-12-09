@@ -37,7 +37,7 @@ const PlotForm = ({ userInputs, setUserInputs, onSave }) => {
         Number of Chapters:
         <input
           type="number"
-          min="1"
+          min="2"
           value={userInputs.plot.numberOfChapters}
           onChange={(e) => handleChange(e, "numberOfChapters")}
         />

@@ -1,0 +1,19 @@
+.evaluation {
+    margin: 2rem 0;
+    padding: 1rem;
+    background: #f1f1f1;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  .evaluation-title {
+    font-size: 1.8rem;
+    color: #ff7f50;
+    margin-bottom: 0.5rem;
+  }
+  
+  .evaluation-content {
+    font-size: 1.2rem;
+    line-height: 1.5;
+  }
+  

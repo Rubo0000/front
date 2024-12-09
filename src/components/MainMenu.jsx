@@ -13,6 +13,7 @@ const MainMenu = ({ userInputs, setUserInputs }) => {
   };
 
   const handleSave = () => {
+    console.log(userInputs.plot.numberOfChapters);
     setExpandedMenu(null);
   };
 
