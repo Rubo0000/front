@@ -80,7 +80,7 @@ const GenerateStory = ({ userInputs }) => {
       const [chapterMatch, ...contentMatch] = response.split("\n\n");
       const newChapter = chapterMatch?.trim() || "Untitled Chapter";
       let newContent = contentMatch.join("\n\n").trim();
-      //const imageUrl = await generateImage({ chapter: newContent });
+      const imageUrl = await generateImage({ chapter: newContent });
       
       // Extraer opciones de decisión y la pregunta
       const decisionStartIndex = newContent.indexOf("*Decisions:*");
@@ -107,7 +107,7 @@ const GenerateStory = ({ userInputs }) => {
       setDecisionOptions(newDecisionOptions);
       setDecisionQuestion(newDecisionQuestion); // Actualiza la pregunta.
       setDecisionActive(newDecisionOptions.length > 0);
-      //setImages((prevImages) => [...prevImages, imageUrl]);
+      setImages((prevImages) => [...prevImages, imageUrl]);
       console.log(currentChapterCount);
       setCurrentChapterCount((prevCount) => prevCount + 1);
 
