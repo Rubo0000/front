@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import "../styles/GenerateStory.css";
 import Evaluation from "./Evaluation";
-import { generateStory, makeDecision, generateImage } from "../api"; // Asegúrate de que el API `generateImage` esté configurado
+import { generateStory, makeDecision, generateImage, getEnding } from "../api"; // Asegúrate de que el API `generateImage` esté configurado
 
 const GenerateStory = ({ userInputs }) => {
   const [title, setTitle] = useState("");
@@ -109,16 +109,19 @@ const GenerateStory = ({ userInputs }) => {
       setDecisionActive(newDecisionOptions.length > 0);
       setImages((prevImages) => [...prevImages, imageUrl]);
       console.log(currentChapterCount);
+      console.log(userInputs.plot.numberOfChapters);
       setCurrentChapterCount((prevCount) => prevCount + 1);
 
       if (currentChapterCount + 1 === userInputs.plot.numberOfChapters) {
-        const evaluationStartIndex = newContent.indexOf("**Evaluation:**");
-        if (evaluationStartIndex !== -1) {
-          const evaluationContent = newContent.slice(evaluationStartIndex).trim(); // Extrae desde esa posición
-          newContent = newContent.slice(0, evaluationStartIndex).trim(); // Elimina la evaluación del contenido del capítulo
-          setEvaluation(evaluationContent); // Almacena la evaluación
+        try {
+          const endingEvaluation = await getEnding(); // Llama al endpoint `/ending`
+          setEvaluation(endingEvaluation); // Almacena la evaluación final
+        } catch (err) {
+          console.error("Error fetching the ending evaluation:", err);
+          setError("Failed to fetch the final evaluation. Please try again.");
         }
       }
+      
     } catch (err) {
       console.error("Error making decision:", err);
       setError("Failed to continue the story. Please try again.");

@@ -40,5 +40,15 @@ export const generateImage = async (chapterData) => {
 };
 
 
+export const getEnding = async () => {
+  try {
+    const response = await API.get("/chatgpt/ending");
+    console.log(response.data);
+    return response.data; // Devuelve la evaluación final desde el endpoint
+  } catch (error) {
+    console.error("Error fetching the ending evaluation:", error);
+    throw error;
+  }
+};
 
 export default API;
